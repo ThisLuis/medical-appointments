@@ -15,6 +15,11 @@ class Appointments {
     constructor() {
         this.appointments = [];
     }
+
+    addApoinment(appoinment) {
+        this.appointments = [ ...this.appointments, appoinment];
+        console.log(this.appointments);
+    }
 }
 
 class UI {
@@ -64,7 +69,6 @@ const objAppointment = {
 
 function dataAppointment(e) {
     objAppointment[e.target.name] = e.target.value;
-    console.log(objAppointment);
 }
 
 function newAppoinment(e) {
@@ -72,5 +76,26 @@ function newAppoinment(e) {
     const { patientName, address, phone, date, hour, symptom } = objAppointment;
     if(patientName === '' || address === '' | phone === '' | date === '' | hour === '' | symptom === '') {
         ui.printAlert('Todos los campos son obligatorios');
+        return;
     }
+
+    objAppointment.id = Date.now();
+
+    adminAppointment.addApoinment({ ...objAppointment });
+
+    form.reset();
+    
+    restartObj();
+
+    // Function to show html here
+    
+}
+
+function restartObj() {
+    objAppointment.patientName = '';
+    objAppointment.address = '';
+    objAppointment.phone = '';
+    objAppointment.date = '';
+    objAppointment.hour = '';
+    objAppointment.symptom = '';
 }
