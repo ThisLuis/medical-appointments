@@ -1,15 +1,17 @@
-const patientName = document.querySelector('#patientName');
-const address = document.querySelector('#address');
-const phone = document.querySelector('#phone');
-const date = document.querySelector('#date');
-const hour = document.querySelector('#hour');
-const symptom = document.querySelector('#symptom');
+const patientNameInput = document.querySelector('#patientName');
+const addressInput = document.querySelector('#address');
+const phoneInput = document.querySelector('#phone');
+const dateInput = document.querySelector('#date');
+const hourInput = document.querySelector('#hour');
+const symptomInput = document.querySelector('#symptom');
 
 // Left container
 const form = document.querySelector('#form');
 
 // Right container
 const medicalAppointments = document.querySelector('#listAppointments');
+
+let edit;
 
 class Appointments {
     constructor() {
@@ -23,6 +25,10 @@ class Appointments {
     deleteAppointment(id) {
         this.appointments = this.appointments.filter( appointment => appointment.id !== id);
     }
+
+    editAppointment(upgradeAppointment) {
+        this.appointments = this.appointments.map( appointment => appointment.id === upgradeAppointment.id ? upgradeAppointment : appointment );  
+    } 
 }
 
 class UI {
@@ -86,8 +92,21 @@ class UI {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg> 
                 Delete`;
-
+            
             btnDelete.onclick = () => deleteAppointment(id);
+
+            
+            const btnEdit = document.createElement('button');
+            btnEdit.classList.add('styles');
+            btnEdit.innerHTML = 
+                `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                </svg>
+                Edit`;
+            
+            btnEdit.onclick = () => loadEdition(appointment);
+
+            
 
             divAppointment.appendChild(patientNameParagraph);
             divAppointment.appendChild(addressParagraph);
@@ -96,6 +115,7 @@ class UI {
             divAppointment.appendChild(hourParagraph);
             divAppointment.appendChild(symptomParagraph);
             divAppointment.appendChild(btnDelete);
+            divAppointment.appendChild(btnEdit);
 
             medicalAppointments.appendChild(divAppointment);
             
@@ -108,12 +128,12 @@ const adminAppointment = new Appointments();
 
 eventListeners();
 function eventListeners() {
-    patientName.addEventListener('input', dataAppointment);
-    address.addEventListener('input', dataAppointment);
-    phone.addEventListener('input', dataAppointment);
-    date.addEventListener('input', dataAppointment);
-    hour.addEventListener('input', dataAppointment);
-    symptom.addEventListener('input', dataAppointment);
+    patientNameInput.addEventListener('input', dataAppointment);
+    addressInput.addEventListener('input', dataAppointment);
+    phoneInput.addEventListener('input', dataAppointment);
+    dateInput.addEventListener('input', dataAppointment);
+    hourInput.addEventListener('input', dataAppointment);
+    symptomInput.addEventListener('input', dataAppointment);
 
     form.addEventListener('submit', newAppoinment);
 }
@@ -140,13 +160,21 @@ function newAppoinment(e) {
         return;
     }
 
-    objAppointment.id = Date.now();
+    if(edit) {
+        ui.printAlert('Editado correctamente');
+        adminAppointment.editAppointment({ ...objAppointment });
+        form.querySelector('button[type="submit"]').textContent = "Register";
+        edit = false;
+    } else {
+        objAppointment.id = Date.now();
+        adminAppointment.addAppointment({ ...objAppointment });
+        ui.printAlert('Cita agregada correctamente', 'success');
+    }
 
-    adminAppointment.addAppointment({ ...objAppointment });
+  
+    restartObj();
 
     form.reset();
-    
-    restartObj();
 
     // Function to show html here
     ui.printAppointment(adminAppointment);
@@ -174,4 +202,28 @@ function deleteAppointment(id) {
     ui.printAlert('La cita se elimino correctamente');
 
     ui.printAppointment(adminAppointment);
+}
+
+function loadEdition(appointment) {
+
+    const { patientName, address, phone, date, hour, symptom, id } = appointment;
+
+    patientNameInput.value = patientName;
+    addressInput.value = address;
+    phoneInput.value = phone;
+    dateInput.value = date;
+    hourInput.value = hour;
+    symptomInput.value = symptom;
+
+    objAppointment.patientName = patientName;
+    objAppointment.address = address;
+    objAppointment.phone = phone;
+    objAppointment.date = date;
+    objAppointment.hour = hour;
+    objAppointment.symptom = symptom;
+    objAppointment.id = id;
+
+    form.querySelector('button[type="submit"]').textContent = "Save changes";
+
+    edit = true;
 }
